@@ -1,13 +1,12 @@
 #include "rook.h"
+#include "ChessBoard.hpp"
 
 using namespace std;
 
-void Rook::calculateRange()
+bool Rook::calculateRange(std::string currentPos, std::string targetPos)
 {
-
+    return true;
 }
 
-Rook::Rook(int _colour)
-{
-    colour = _colour;
-}
+Rook::Rook(Colour _colour, ChessBoard* _board) : Piece(_colour, _board)
+{ }

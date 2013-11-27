@@ -18,30 +18,36 @@ class ChessBoard
     private:
         // map holding the current positions of pieces on the board
         // key is the coords, value is a pointer to a piece
-        std::map<std::vector<int>, Piece*> positions;
+        std::map<std::string, Piece*> positions;
 
         // whose turn it is
-        bool whiteTurn;
+        Colour whoseTurn;
 
         // if either player is in check
-        int inCheck;
+        Colour inCheck;
 
 
         // check if move is valid
-        bool validateMove(std::vector<int> startPos, std::vector<int> endPos);
+        bool validateMove(std::string startPos, std::string endPos);
 
         // update position of piece
-        void updatePosition(std::vector<int> startPos, std::vector<int> endPos);
+        void updatePosition(std::string startPos, std::string endPos);
 
     public:
         // reset pieces to starting positions
         void resetBoard();
 
+        // check if given position is on board
+        bool onBoard(std::string position);
+
         // take in start and end positions on board
         void submitMove(std::string startPos, std::string endPos);
 
         // check if piece is in given position and return colour or neither
-        int checkForPiece(std::vector<int> position);
+        Colour checkForPiece(std::string startPos);
+
+        // for testing purposes
+        void printBoard();
 
         // constructor, needs to set up board
         ChessBoard();

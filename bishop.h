@@ -6,9 +6,11 @@
 class Bishop: public Piece
 {
     public:
-        void calculateRange();
+        // needs to be declared here for some reason? because it is pure virtual in Piece?
+        bool calculateRange(std::string startPos, std::string endPos);
+
         // constructor
-        Bishop(int colour);
+        Bishop(Colour colour, ChessBoard* board);
 };
 
 #endif

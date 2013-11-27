@@ -1,14 +1,12 @@
 #include "king.h"
+#include "ChessBoard.hpp"
 
 using namespace std;
 
-void King::calculateRange()
+bool King::calculateRange(std::string currentPos, std::string targetPos)
 {
-
+    return true;
 }
 
-King::King(int _colour)
-{
-    colour = _colour;
-}
-
+King::King(Colour _colour, ChessBoard* _board) : Piece(_colour, _board)
+{ }

@@ -1,119 +1,148 @@
 #include <iostream>
 
-#include "chessBoard.hpp"
+#include "ChessBoard.hpp"
 
 using namespace std;
 
 void ChessBoard::resetBoard()
 {
-    vector<int> pos(2);
+    // get rid of anything left over from last game
+    // going to have to destruct leftovers as well otherwise left with dangling pointers?
+    positions.clear();
 
-    // first want to set the null pointers where there are no pieces
-    for (int i = 3; i < 7; i++){
-        for (int j = 1; j < 9; j++){
-            // want to assign them more succintly but g++ version is too old???
-            pos[0] = i;
-            pos[1] = j;
-            positions[pos] = NULL;
-        }
-    }
+    string pos = "A1";
 
     // pawns
-    for (int j = 1; j < 9; j++){
-        pos[0] = 2;
-        pos[1] = j;
-        positions[pos] = new Pawn(BLACK);
+    for (char file = 'A'; file < 'I'; file++){
+        pos[0] = file;
 
-        pos[0] = 7;
-        pos[1] = j;
-        positions[pos] = new Pawn(WHITE);
+        pos[1] = '2';
+        //cout << posString << endl;
+        positions[pos] = new Pawn(WHITE, this);
+
+        pos[1] = '7';
+        //cout << posString << endl;
+        positions[pos] = new Pawn(BLACK, this);
     }
-
-    // other black pieces
-    pos[0] = 8;
-    pos[1] = 1;
-    positions[pos] = new Rook(BLACK);
-    pos[1] = 2;
-    positions[pos] = new Knight(BLACK);
-    pos[1] = 3;
-    positions[pos] = new Bishop(BLACK);
-    pos[1] = 4;
-    positions[pos] = new Queen(BLACK);
-    pos[1] = 5;
-    positions[pos] = new King(BLACK);
-    pos[1] = 6;
-    positions[pos] = new Bishop(BLACK);
-    pos[1] = 7;
-    positions[pos] = new Knight(BLACK);
-    pos[1] = 8;
-    positions[pos] = new Rook(BLACK);
 
     // other white pieces
-    pos[0] = 1;
-    pos[1] = 1;
-    positions[pos] = new Rook(WHITE);
-    pos[1] = 2;
-    positions[pos] = new Knight(WHITE);
-    pos[1] = 3;
-    positions[pos] = new Bishop(WHITE);
-    pos[1] = 4;
-    positions[pos] = new Queen(WHITE);
-    pos[1] = 5;
-    positions[pos] = new King(WHITE);
-    pos[1] = 6;
-    positions[pos] = new Bishop(WHITE);
-    pos[1] = 7;
-    positions[pos] = new Knight(WHITE);
-    pos[1] = 8;
-    positions[pos] = new Rook(WHITE);
+    positions["A1"] = new Rook(WHITE, this);
+    positions["B1"] = new Knight(WHITE, this);
+    positions["C1"] = new Bishop(WHITE, this);
+    positions["D1"] = new Queen(WHITE, this);
+    positions["E1"] = new King(WHITE, this);
+    positions["F1"] = new Bishop(WHITE, this);
+    positions["G1"] = new Knight(WHITE, this);
+    positions["H1"] = new Rook(WHITE, this);
 
-    cout << "Board created" << endl;
+    // other black pieces
+    positions["A8"] = new Rook(BLACK, this);
+    positions["B8"] = new Knight(BLACK, this);
+    positions["C8"] = new Bishop(BLACK, this);
+    positions["D8"] = new Queen(BLACK, this);
+    positions["E8"] = new King(BLACK, this);
+    positions["F8"] = new Bishop(BLACK, this);
+    positions["G8"] = new Knight(BLACK, this);
+    positions["H8"] = new Rook(BLACK, this);
 
-    /*
-    pos[1] = 8;
-    pos[0] = 8;
-    cout << positions.find(pos)->second->colour << endl;
-    */
+    //printBoard();
 }
 
-void ChessBoard::submitMove(string startPos, string endPos)
+
+// going to have to test this to see wtf is going on.......
+void ChessBoard::printBoard()
 {
-    vector<int> startVector(2);
-    vector<int> endVector(2);
+    typedef map<string, Piece*>::iterator it;
 
-    //cout << startPos.at(1) << endl;
+    for (it it1 = positions.begin(); it1 != positions.end(); it1++){
+        cout << "piece found at " << it1->first << endl;
+    }
+    
+    cout << "trying to find D7 " << positions.count("D7") << endl;
+}
 
-    startVector[0] = startPos.at(0) - 64;
-    startVector[1] = startPos.at(1) - 48;
-    cout << "starting coords " << startVector[0] << "-" << startVector[1] << endl;
-    endVector[0] = endPos.at(0) - 64;
-    endVector[1] = endPos.at(1) - 48;
-    cout << "end coords " << endVector[0] << "-" <<  endVector[1] << endl;
 
-    // check that start and end positions are on the board
-    if (startVector[0] < 1 || startVector[0] > 8){
-        cout << "Starting square not on board!" << endl;
-    }else if (endVector[0] < 1 || endVector[0] > 8){
-        cout << "Destination square not on board!" << endl;
+void ChessBoard::submitMove(string currentPos, string targetPos)
+{
+    // check if move is legal
+    if (validateMove(currentPos, targetPos)){
+        // update turn
+        whoseTurn = (whoseTurn == WHITE ? BLACK : WHITE);
     }
 }
 
-int ChessBoard::checkForPiece(vector<int> position)
+bool ChessBoard::onBoard(string position)
 {
-    return 0;
+    if (position[0] < 'A' || position[0] > 'H' || position[1] < '1' || position[1] > '8'){
+        return false;
+    }else {
+        return true;
+    }
 }
 
-bool ChessBoard::validateMove(vector<int> startPos, vector<int> endPos)
+Colour ChessBoard::checkForPiece(string strPos)
 {
-    return true;
+    // if there is a piece then return it's colour
+    if (positions.count(strPos)){
+        return positions.find(strPos)->second->colour;
+    }else {
+        return NO_PIECE;
+    }
 }
 
-void ChessBoard::updatePosition(vector<int> startPos, vector<int> endPos)
+bool ChessBoard::validateMove(string currentPos, string targetPos) 
 {
+    Piece* piecePtr;
+
+    // check if there is a piece at the location
+    if (positions.count(currentPos) == 0){
+        cout << "There is no piece at position " << currentPos << endl;
+        return false;
+    }else {
+        // get pointer to piece
+        piecePtr = positions.find(currentPos)->second;
+    }
+
+    // check piece is the correct colour
+    if (piecePtr->colour != whoseTurn){
+        cout << "It is not " << whoseTurn << "'s turn to move!" << endl;
+        return false;
+    }
+    
+    // once here we know that it is legal to move the piece
+    // get piece to calculate its range
+    //cout << "asked to calculate range" << endl;
+    if (piecePtr->calculateRange(currentPos, targetPos)){
+        updatePosition(currentPos, targetPos);
+        cout << "move from " << currentPos << " to " << targetPos << endl;
+        return true;
+    }else {
+        cout << "cannot move to " << targetPos << endl;
+        return false;
+    }
 
 }
 
-ChessBoard::ChessBoard()
+void ChessBoard::updatePosition(std::string startPos, std::string endPos)
+{
+    Piece* piecePtr = positions.find(startPos)->second;
+
+    // if there is a piece at target position (ie it is captured)
+    if (positions.count(endPos)){
+        // delete piece pointer
+        delete positions.find(endPos)->second;
+        // square now occupied by new piece
+        positions.find(endPos)->second = piecePtr;
+    }
+
+    // if there was no piece there then we need to create a map element
+    positions[endPos] = piecePtr;
+
+    // now delete the starting square from map
+    positions.erase(startPos);
+}
+
+ChessBoard::ChessBoard() : whoseTurn(WHITE), inCheck(NO_PIECE)
 {
     resetBoard();
 }

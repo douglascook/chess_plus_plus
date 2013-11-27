@@ -14,6 +14,9 @@ int main() {
     ChessBoard cb;
     cout << endl;
 
+    //// testing bits ////
+    //cb.printBoard();
+
     cb.submitMove("D7", "D6");
     cout << endl;
 
