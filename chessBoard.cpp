@@ -9,7 +9,13 @@ void ChessBoard::resetBoard()
     // get rid of anything left over from last game
     // going to have to destruct leftovers as well otherwise left with dangling pointers?
     whoseTurn = WHITE;
+    inCheck = NO_PIECE;
     positions.clear();
+
+    // record positions of kings for quick access
+    kings.clear();
+    kings.push_back("E1");
+    kings.push_back("E8");
 
     string pos = "A1";
 
@@ -46,9 +52,17 @@ void ChessBoard::resetBoard()
     positions["G8"] = new Knight(BLACK, this);
     positions["H8"] = new Rook(BLACK, this);
 
+    updateValidMoves();
     //printBoard();
 }
 
+void ChessBoard::updateValidMoves()
+{
+    // loop through and update all move vectors
+    for (map<string, Piece*>::iterator it = positions.begin(); it != positions.end(); it++){
+        it->second->calculateValidMoves(it->first);
+    }
+}
 
 void ChessBoard::printBoard()
 {
@@ -64,15 +78,49 @@ void ChessBoard::printBoard()
 
 void ChessBoard::submitMove(string currentPos, string targetPos)
 {
+    //cout << "testing move from " << currentPos << " to " << targetPos << endl;
+    // first update valid moves for all pieces
+    updateValidMoves();
+
     // check if move is legal
     if (validateMove(currentPos, targetPos)){
+        // only want to do this for current players pieces?
+        updateValidMoves();
+
         // update turn
         whoseTurn = (whoseTurn == WHITE ? BLACK : WHITE);
+        if (playerInCheck(kings[whoseTurn])){
+            inCheck = whoseTurn;
+            cout << "player " << inCheck << " is in check" << endl;
+        }
     }
 }
 
+bool ChessBoard::playerInCheck(string king)
+{
+    Piece* piecePtr;
+
+    // check if next player is in check
+    for (map<string, Piece*>::iterator it = positions.begin(); it != positions.end(); it++){
+        piecePtr = it->second;
+        // if it player who just moved's piece
+        if (piecePtr->colour != whoseTurn){
+            // check if king is within range
+            for (unsigned i = 0; i < piecePtr->validMoves.size(); i++){
+                if (piecePtr->validMoves[i] == king){
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+    
+
 bool ChessBoard::onBoard(string position)
 {
+    // check piece is within bounds of board
     if (position[0] < 'A' || position[0] > 'H' || position[1] < '1' || position[1] > '8'){
         return false;
     }else {
@@ -109,13 +157,21 @@ bool ChessBoard::validateMove(string currentPos, string targetPos)
         return false;
     }
     
-    // once here we know that it is legal to move the piece
-    // get piece to calculate its range
     //cout << "asked to calculate range" << endl;
-    if (piecePtr->calculateRange(currentPos, targetPos)){
+    if (piecePtr->checkValidMove(targetPos)){
         updatePosition(currentPos, targetPos);
-        cout << "move from " << currentPos << " to " << targetPos << endl;
-        return true;
+
+        // now need to check if player moving has put themselves in check
+        if (playerInCheck(kings[whoseTurn])){
+            cout << "cannot make that move, it would put you in check" << endl;
+            // undo move
+            // need to add something here to replace piece if taken
+            updatePosition(targetPos, currentPos);
+            return false;
+        }else {
+            cout << "move from " << currentPos << " to " << targetPos << endl;
+            return true;
+        }
     }else {
         cout << "cannot move to " << targetPos << endl;
         return false;
@@ -126,6 +182,15 @@ bool ChessBoard::validateMove(string currentPos, string targetPos)
 void ChessBoard::updatePosition(std::string startPos, std::string endPos)
 {
     Piece* piecePtr = positions.find(startPos)->second;
+
+    // need to simplify this once piece types are in place
+    // if the piece moved is a king update it's position
+    for (unsigned i =0; i < 2; i++){
+        if (kings[i] == startPos){
+            kings[i] = endPos;
+            break;
+        }
+    }
 
     // if there is a piece at target position (ie it is captured)
     if (positions.count(endPos)){

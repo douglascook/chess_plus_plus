@@ -3,15 +3,19 @@
 
 using namespace std;
 
-bool Pawn::calculateRange(std::string currentPos, std::string targetPos)
+void Pawn::calculateValidMoves(std::string currentPos)
 {
-    std::string endPos = currentPos;
+    // get rid of any moves left over from last turn
+    validMoves.clear();
+    string endPos = currentPos;
+    // why does resizing not work???????????????
+    //endPos.resize(2);
     
     // standard move, need to check which colour is moving
     colour == WHITE ? endPos[1]++ : endPos[1]--;
     // if there is no piece in the way add to possible moves
     if (board->onBoard(endPos) && board->checkForPiece(endPos) == NO_PIECE){
-        possibleMoves.push_back(endPos);
+        validMoves.push_back(endPos);
     }
 
     // now check for pieces that can be captured 
@@ -19,12 +23,12 @@ bool Pawn::calculateRange(std::string currentPos, std::string targetPos)
     // if it is an enemy piece
     // has to be a nicer way to check that the the piece is of the other colour
     if (board->onBoard(endPos) && board->checkForPiece(endPos) == (colour + 1)%2 ){
-        possibleMoves.push_back(endPos);
+        validMoves.push_back(endPos);
     }
     endPos[0] = currentPos[0] + 1;
     // if it is an enemy piece
     if (board->onBoard(endPos) && board->checkForPiece(endPos) == (colour + 1)%2 ){
-        possibleMoves.push_back(endPos);
+        validMoves.push_back(endPos);
     }
 
     // if its first move check two squares ahead
@@ -34,16 +38,11 @@ bool Pawn::calculateRange(std::string currentPos, std::string targetPos)
         colour == WHITE ? endPos[1]++ : endPos[1]--;
         //cout << endPos << endl;
         if (board->onBoard(endPos) && board->checkForPiece(endPos) == NO_PIECE){
-            possibleMoves.push_back(endPos);
+            validMoves.push_back(endPos);
         }
     }
-    //cout << possibleMoves.size() << " possible moves" << endl;
 
-    if (checkInRange(targetPos)){
-        moved = true;
-        return true;
-    }
-    return false;
+    //cout << validMoves.size() << " possible moves in range from position " << currentPos << endl;
 }
 
 Pawn::Pawn(Colour _colour, ChessBoard* _board) 

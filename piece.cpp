@@ -2,11 +2,12 @@
 
 using namespace std;
 
-bool Piece::checkInRange(string targetPos)
+bool Piece::checkValidMove(string targetPos)
 {
     // loop through and check if destination square is within range
-    for (unsigned i = 0; i < possibleMoves.size(); i++){
-        if (possibleMoves[i] == targetPos){
+    //cout << validMoves.size() << " possible moves" << endl;
+    for (unsigned i = 0; i < validMoves.size(); i++){
+        if (validMoves[i] == targetPos){
             return true;
         }
     }
