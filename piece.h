@@ -2,7 +2,7 @@
 #define PIECE_H
 
 // numbers to use for black, white, neither in check
-enum Colour {NO_PIECE, WHITE, BLACK};
+enum Colour {WHITE, BLACK, NO_PIECE};
 
 #include <vector>
 #include <iostream>

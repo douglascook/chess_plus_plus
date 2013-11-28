@@ -10,19 +10,20 @@ bool Pawn::calculateRange(std::string currentPos, std::string targetPos)
     // standard move, need to check which colour is moving
     colour == WHITE ? endPos[1]++ : endPos[1]--;
     // if there is no piece in the way add to possible moves
-    if (board->onBoard(endPos) && !board->checkForPiece(endPos)){
+    if (board->onBoard(endPos) && board->checkForPiece(endPos) == NO_PIECE){
         possibleMoves.push_back(endPos);
     }
 
     // now check for pieces that can be captured 
     endPos[0] = currentPos[0] - 1;
     // if it is an enemy piece
-    if (board->onBoard(endPos) && board->checkForPiece(endPos) != NO_PIECE && board->checkForPiece(endPos) != colour){
+    // has to be a nicer way to check that the the piece is of the other colour
+    if (board->onBoard(endPos) && board->checkForPiece(endPos) == (colour + 1)%2 ){
         possibleMoves.push_back(endPos);
     }
     endPos[0] = currentPos[0] + 1;
     // if it is an enemy piece
-    if (board->onBoard(endPos) && board->checkForPiece(endPos) != NO_PIECE && board->checkForPiece(endPos) != colour){
+    if (board->onBoard(endPos) && board->checkForPiece(endPos) == (colour + 1)%2 ){
         possibleMoves.push_back(endPos);
     }
 

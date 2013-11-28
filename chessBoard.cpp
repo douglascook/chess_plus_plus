@@ -8,6 +8,7 @@ void ChessBoard::resetBoard()
 {
     // get rid of anything left over from last game
     // going to have to destruct leftovers as well otherwise left with dangling pointers?
+    whoseTurn = WHITE;
     positions.clear();
 
     string pos = "A1";
@@ -49,7 +50,6 @@ void ChessBoard::resetBoard()
 }
 
 
-// going to have to test this to see wtf is going on.......
 void ChessBoard::printBoard()
 {
     typedef map<string, Piece*>::iterator it;
