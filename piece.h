@@ -26,16 +26,10 @@ class Piece
         // current position of the piece
         std::string currentPos;
 
-        // range of the piece based on current positions
-        std::vector<std::string> validMoves;
-
-        // check if the target square is range of the piece
-        bool checkValidMove(std::string targetPos);
-
     public:
         // create the range vector
         // this is pure virtual -> the class is abstract
-        virtual void calculateValidMoves(std::string currentPos) = 0;
+        virtual bool validMove(std::string currentPos, std::string targetPos) = 0;
 
         // non-default constructor, to be used in derived constructors
         Piece(Colour colour, ChessBoard* board);

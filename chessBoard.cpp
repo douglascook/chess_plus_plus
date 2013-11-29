@@ -24,11 +24,9 @@ void ChessBoard::resetBoard()
         pos[0] = file;
 
         pos[1] = '2';
-        //cout << posString << endl;
         positions[pos] = new Pawn(WHITE, this);
 
         pos[1] = '7';
-        //cout << posString << endl;
         positions[pos] = new Pawn(BLACK, this);
     }
 
@@ -52,16 +50,7 @@ void ChessBoard::resetBoard()
     positions["G8"] = new Knight(BLACK, this);
     positions["H8"] = new Rook(BLACK, this);
 
-    updateValidMoves();
     //printBoard();
-}
-
-void ChessBoard::updateValidMoves()
-{
-    // loop through and update all move vectors
-    for (map<string, Piece*>::iterator it = positions.begin(); it != positions.end(); it++){
-        it->second->calculateValidMoves(it->first);
-    }
 }
 
 void ChessBoard::printBoard()
@@ -78,14 +67,8 @@ void ChessBoard::printBoard()
 
 void ChessBoard::submitMove(string currentPos, string targetPos)
 {
-    //cout << "testing move from " << currentPos << " to " << targetPos << endl;
-    // first update valid moves for all pieces
-    updateValidMoves();
-
     // check if move is legal
     if (validateMove(currentPos, targetPos)){
-        // only want to do this for current players pieces?
-        updateValidMoves();
 
         // update turn
         whoseTurn = (whoseTurn == WHITE ? BLACK : WHITE);
@@ -105,11 +88,10 @@ bool ChessBoard::playerInCheck(string king)
         piecePtr = it->second;
         // if it player who just moved's piece
         if (piecePtr->colour != whoseTurn){
-            // check if king is within range
-            for (unsigned i = 0; i < piecePtr->validMoves.size(); i++){
-                if (piecePtr->validMoves[i] == king){
-                    return true;
-                }
+            // check if king is within range of current piece
+            if (piecePtr->validMove(it->first, king)){
+                //cout << "king at " << king << "in check from piece at " << it->first << endl;
+                return true;
             }
         }
     }
@@ -158,7 +140,7 @@ bool ChessBoard::validateMove(string currentPos, string targetPos)
     }
     
     //cout << "asked to calculate range" << endl;
-    if (piecePtr->checkValidMove(targetPos)){
+    if (piecePtr->validMove(currentPos, targetPos)){
         updatePosition(currentPos, targetPos);
 
         // now need to check if player moving has put themselves in check

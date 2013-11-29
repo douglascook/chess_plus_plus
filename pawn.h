@@ -9,7 +9,7 @@ class Pawn : public Piece
         // used to record if pawn has moved yet
         bool moved;
         // needs to be declared here for some reason? because it is pure virtual in Piece?
-        void calculateValidMoves(std::string currentPos);
+        bool validMove(std::string currentPos, std::string targetPos);
         // constructor
         Pawn(Colour colour, ChessBoard* board);
 };

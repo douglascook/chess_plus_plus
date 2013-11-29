@@ -26,10 +26,8 @@ class ChessBoard
         // if either player is in check
         Colour inCheck;
 
+        // records positions of kings
         std::vector<std::string> kings;
-
-        // update move vectors for all pieces
-        void updateValidMoves();
 
         // check if move is valid
         bool validateMove(std::string startPos, std::string endPos);
