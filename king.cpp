@@ -3,59 +3,65 @@
 
 using namespace std;
 
-bool King::validMove(string currentPos, string targetPos)
+void King::calculateValidMoves(std::string currentPos)
 {
+    // get rid of any moves left over from last turn
+    validMoves.clear();
     string endPos = currentPos;
 
     // can do some sort of loop to shorten this too?
     // E
     endPos[0] = currentPos[0] + 1;
-    if (endPos == targetPos && board->checkForPiece(endPos) != colour){
-        return true;
+    if (board->onBoard(endPos) && board->checkForPiece(endPos) != colour){
+        validMoves.push_back(endPos);
     }
+
     // W
     endPos[0] = currentPos[0] - 1;
-    if (endPos == targetPos && board->checkForPiece(endPos) != colour){
-        return true;
+    if (board->onBoard(endPos) && board->checkForPiece(endPos) != colour){
+        validMoves.push_back(endPos);
     }
+
     // N
     endPos[1] = currentPos[1] + 1;
-    if (endPos == targetPos && board->checkForPiece(endPos) != colour){
-        return true;
+    if (board->onBoard(endPos) && board->checkForPiece(endPos) != colour){
+        validMoves.push_back(endPos);
     }
+
     // S
     endPos[1] = currentPos[1] - 1;
-    if (endPos == targetPos && board->checkForPiece(endPos) != colour){
-        return true;
+    if (board->onBoard(endPos) && board->checkForPiece(endPos) != colour){
+        validMoves.push_back(endPos);
     }
+
     // NE
     endPos[0] = currentPos[0] + 1;
     endPos[1] = currentPos[1] + 1;
-    if (endPos == targetPos && board->checkForPiece(endPos) != colour){
-        return true;
+    if (board->onBoard(endPos) && board->checkForPiece(endPos) != colour){
+        validMoves.push_back(endPos);
     }
+
     // SE
     endPos[0] = currentPos[0] + 1;
     endPos[1] = currentPos[1] - 1;
-    if (endPos == targetPos && board->checkForPiece(endPos) != colour){
-        return true;
+    if (board->onBoard(endPos) && board->checkForPiece(endPos) != colour){
+        validMoves.push_back(endPos);
     }
+
     // SW
     endPos[0] = currentPos[0] - 1;
     endPos[1] = currentPos[1] - 1;
-    if (endPos == targetPos && board->checkForPiece(endPos) != colour){
-        return true;
+    if (board->onBoard(endPos) && board->checkForPiece(endPos) != colour){
+        validMoves.push_back(endPos);
     }
+
     // NW
     endPos[0] = currentPos[0] - 1;
     endPos[1] = currentPos[1] + 1;
-    if (endPos == targetPos && board->checkForPiece(endPos) != colour){
-        return true;
+    if (board->onBoard(endPos) && board->checkForPiece(endPos) != colour){
+        validMoves.push_back(endPos);
     }
-
-    // otherwise move is invalid
-    return false;
 }
 
-King::King(Colour _colour, ChessBoard* _board) : Piece(_colour, _board)
+King::King(Colour _colour, ChessBoard* _board) : Piece(_colour, "King", _board)
 { }

@@ -3,48 +3,48 @@
 
 using namespace std;
 
-bool Pawn::validMove(string currentPos, string targetPos)
+void Pawn::calculateValidMoves(std::string currentPos)
 {
+    // get rid of any moves left over from last turn
+    validMoves.clear();
     string endPos = currentPos;
     // why does resizing not work???????????????
     //endPos.resize(2);
     
     // standard move, need to check which colour is moving
     colour == WHITE ? endPos[1]++ : endPos[1]--;
-    // if there is no piece there already move is valid 
-    if (targetPos == endPos && board->checkForPiece(endPos) == NO_PIECE){
-        return true;
+    // if there is no piece in the way add to possible moves
+    if (board->onBoard(endPos) && board->checkForPiece(endPos) == NO_PIECE){
+        validMoves.push_back(endPos);
     }
 
     // now check for pieces that can be captured 
     endPos[0] = currentPos[0] - 1;
     // if it is an enemy piece
-    if (endPos == targetPos && board->checkForPiece(endPos) == (colour + 1)%2 ){
-        return true;
+    // has to be a nicer way to check that the the piece is of the other colour
+    if (board->onBoard(endPos) && board->checkForPiece(endPos) == (colour + 1)%2 ){
+        validMoves.push_back(endPos);
     }
-
     endPos[0] = currentPos[0] + 1;
     // if it is an enemy piece
-    if (endPos == targetPos && board->checkForPiece(endPos) == (colour + 1)%2 ){
-        return true;
+    if (board->onBoard(endPos) && board->checkForPiece(endPos) == (colour + 1)%2 ){
+        validMoves.push_back(endPos);
     }
 
-    endPos[0] = currentPos[0];
     // if its first move check two squares ahead
+    endPos[0] = currentPos[0];
+    //cout << endPos << endl;
     if (!moved){
         colour == WHITE ? endPos[1]++ : endPos[1]--;
         //cout << endPos << endl;
-        if (endPos == targetPos && board->checkForPiece(endPos) == NO_PIECE){
-            return true;
+        if (board->onBoard(endPos) && board->checkForPiece(endPos) == NO_PIECE){
+            validMoves.push_back(endPos);
         }
     }
-
-    // if it doesnt match one of cases above move is not valid
-    return false;
 
     //cout << validMoves.size() << " possible moves in range from position " << currentPos << endl;
 }
 
 Pawn::Pawn(Colour _colour, ChessBoard* _board) 
-    : Piece(_colour, _board), moved(false) 
+    : Piece(_colour, "Pawn", _board), moved(false) 
 { }
