@@ -57,6 +57,7 @@ void ChessBoard::resetBoard()
     cout << "A new chess game is started!" << endl;
 }
 
+/*
 void ChessBoard::printBoard()
 {
     typedef map<string, Piece*>::iterator it;
@@ -132,7 +133,7 @@ void ChessBoard::printBoard()
     }
     cout << endl << endl;
 }
-
+*/
 
 void ChessBoard::submitMove(string currentPos, string targetPos)
 {
@@ -173,8 +174,8 @@ bool ChessBoard::validateMove(string currentPos, string targetPos)
     }
     
     // check piece is the correct colour
-    if (piece->colour != whoseTurn){
-        cout << "It is not " << whoseTurn << "'s turn to move!" << endl;
+    if (piece->getColour() != whoseTurn){
+        cout << "It is not " << printColour(whoseTurn) << "'s turn to move!" << endl;
         return false;
     }
     
@@ -191,16 +192,16 @@ bool ChessBoard::validateMove(string currentPos, string targetPos)
             return false;
         }else if (takenPiece != NULL){
             // a piece has been taken so report it
-            cout << whoseTurn << "'s " << piece->type << " moves from " << currentPos << " to " << targetPos 
-                 << " taking " << whoseTurn << "'s " << takenPiece->type << endl;
+            cout << printColour(whoseTurn) << "'s " << piece->getType() << " moves from " << currentPos << " to " << targetPos 
+                 << " taking " << printColour(whoseTurn) << "'s " << takenPiece->getType() << endl;
             delete takenPiece;
             return true;
         }else {
-            cout << whoseTurn << "'s " << piece->type << " moves from " << currentPos << " to " << targetPos << endl;
+            cout << printColour(whoseTurn) << "'s " << piece->getType() << " moves from " << currentPos << " to " << targetPos << endl;
             return true;
         }
     }else {
-        cout << "cannot move " << piece->type << " to " << targetPos << endl;
+        cout << "cannot move " << piece->getType() << " to " << targetPos << endl;
 
         /*
         // DEBUGGING
@@ -232,7 +233,7 @@ bool ChessBoard::playerInCheck()
     for (pieceIterator it = positions.begin(); it != positions.end(); it++){
         piece = it->second;
         // if it player who just moved's piece and king is within range
-        if (piece->colour != whoseTurn && piece->checkValidMove(kings[whoseTurn])){
+        if (piece->getColour() != whoseTurn && piece->checkValidMove(kings[whoseTurn])){
             return true;
         }
     }
@@ -256,8 +257,11 @@ bool ChessBoard::mateCheck()
         originalPos = it->first;
 
         // turn is updated before the mate checks are called so use current player here
-        if (piece->colour == whoseTurn){
-            moveSet = piece->validMoves;
+        if (piece->getColour() == whoseTurn){
+            // since the moves are going to be updated each time a move is tested
+            // need to save the current options so that only loop through them
+            moveSet = piece->getValidMoves();
+
             // check all moves for this piece and see if king is still in check
             for (unsigned i = 0; i < moveSet.size(); i++){
                 testPos = moveSet[i];
@@ -275,10 +279,9 @@ bool ChessBoard::mateCheck()
 
                 }else {
                     // still in check
-                    // put pieces back
+                    // put pieces back and reset valid moves so that next move can be checked 
                     positions = originalPositions;
                     kings = originalKings;
-                    // why do I need this here if I have it above in line 269???
                     updateValidMoves();
                 }
             }
@@ -303,7 +306,7 @@ Colour ChessBoard::checkForPiece(string strPos)
 {
     // if there is a piece then return its colour
     if (positions.count(strPos)){
-        return positions.find(strPos)->second->colour;
+        return positions.find(strPos)->second->getColour() ;
     }else {
         return NO_PIECE;
     }
@@ -325,12 +328,21 @@ void ChessBoard::updatePosition(string startPos, string endPos, Piece*& takenPie
     }
 
     // if the piece moved is a king update it's position
-    if (piece->type == "King"){
+    if (piece->getType() == "King"){
         kings[whoseTurn] = endPos;
     }
 
     // delete the starting square from map
     positions.erase(startPos);
+}
+
+string ChessBoard::printColour(Colour colour)
+{
+    if (colour == WHITE){
+        return "White";
+    }else {
+        return "Black";
+    }
 }
 
 ChessBoard::ChessBoard() : whoseTurn(WHITE)
