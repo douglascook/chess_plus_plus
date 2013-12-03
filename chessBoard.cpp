@@ -9,7 +9,6 @@ void ChessBoard::resetBoard()
     // get rid of anything left over from last game
     // going to have to destruct leftovers as well otherwise left with dangling pointers?
     whoseTurn = WHITE;
-    inCheck = NO_PIECE;
     positions.clear();
 
     // record positions of kings for quick access
@@ -19,7 +18,7 @@ void ChessBoard::resetBoard()
 
     string pos = "A1";
 
-    // pawns
+    // setup pawns
     for (char file = 'A'; file < 'I'; file++){
         pos[0] = file;
 
@@ -32,7 +31,7 @@ void ChessBoard::resetBoard()
         positions[pos] = new Pawn(BLACK, this);
     }
 
-    // other white pieces
+    // setup other white pieces
     positions["A1"] = new Rook(WHITE, this);
     positions["B1"] = new Knight(WHITE, this);
     positions["C1"] = new Bishop(WHITE, this);
@@ -42,7 +41,7 @@ void ChessBoard::resetBoard()
     positions["G1"] = new Knight(WHITE, this);
     positions["H1"] = new Rook(WHITE, this);
 
-    // other black pieces
+    // setup other black pieces
     positions["A8"] = new Rook(BLACK, this);
     positions["B8"] = new Knight(BLACK, this);
     positions["C8"] = new Bishop(BLACK, this);
@@ -52,10 +51,10 @@ void ChessBoard::resetBoard()
     positions["G8"] = new Knight(BLACK, this);
     positions["H8"] = new Rook(BLACK, this);
 
-    //printBoard();
-
     // first update valid moves for all pieces
     updateValidMoves();
+
+    cout << "A new chess game is started!" << endl;
 }
 
 void ChessBoard::printBoard()
@@ -72,7 +71,6 @@ void ChessBoard::printBoard()
             board[i][j] = ' ';
         }
     }
-
 
     for (it it1 = positions.begin(); it1 != positions.end(); it1++){
         if (it1->second->colour == WHITE){
@@ -138,48 +136,103 @@ void ChessBoard::printBoard()
 
 void ChessBoard::submitMove(string currentPos, string targetPos)
 {
-    //cout << "testing move from " << currentPos << " to " << targetPos << endl;
     // check if move is legal
     if (validateMove(currentPos, targetPos)){
-        //printBoard();
-        updateValidMoves();
-
-        //cout << "kings at " << kings[0] << " and " << kings[1] << endl;
-        //cout << kings[(whoseTurn + 1) % 2] << endl;
+        // moved updateValidMoves into validate move
+        //updateValidMoves();
 
         // update turn to check for mates
         whoseTurn = (whoseTurn == WHITE ? BLACK : WHITE);
 
-        // checkmate (of non-current player) or stalemate check
+        // checkmate or stalemate check
         if (mateCheck()){
-            if (playerInCheck(whoseTurn)){
+            if (playerInCheck()){
                 cout << "player " << whoseTurn << " is in check mate" << endl;
             }else {
                 cout << "Stalemate!!!" << endl;
             }
-        }else if (playerInCheck(whoseTurn)){
+        }else if (playerInCheck()){
             cout << "player " << whoseTurn << " is in check" << endl;
         }
+    }
+}
+
+bool ChessBoard::validateMove(string currentPos, string targetPos) 
+{
+    Piece* piece; 
+    Piece* takenPiece = NULL;
+    map<string, Piece*> originalPositions = positions;
+
+    // check if there is a piece at the location
+    if (positions.count(currentPos) == 0){
+        cout << "There is no piece at position " << currentPos << endl;
+        return false;
+    }else {
+        // get pointer to piece
+        piece = positions.find(currentPos)->second;
+    }
+    
+    // check piece is the correct colour
+    if (piece->colour != whoseTurn){
+        cout << "It is not " << whoseTurn << "'s turn to move!" << endl;
+        return false;
+    }
+    
+    if (piece->checkValidMove(targetPos)){
+        updatePosition(currentPos, targetPos, takenPiece);
+        updateValidMoves();
+
+        // now need to check if player moving has put themselves in check
+        if (playerInCheck()){
+            cout << "cannot make that move, it would put you in check" << endl;
+            // undo move
+            positions = originalPositions;
+            updateValidMoves();
+            return false;
+        }else if (takenPiece != NULL){
+            // a piece has been taken so report it
+            cout << whoseTurn << "'s " << piece->type << " moves from " << currentPos << " to " << targetPos 
+                 << " taking " << whoseTurn << "'s " << takenPiece->type << endl;
+            delete takenPiece;
+            return true;
+        }else {
+            cout << whoseTurn << "'s " << piece->type << " moves from " << currentPos << " to " << targetPos << endl;
+            return true;
+        }
+    }else {
+        cout << "cannot move " << piece->type << " to " << targetPos << endl;
+
+        /*
+        // DEBUGGING
+        cout << "possible moves are ";
+        for (unsigned i = 0; i < piece->validMoves.size(); i++){
+            cout << piece->validMoves[i] << ", ";
+        }
+        cout << endl;
+        printBoard();
+        */
+
+        return false;
     }
 }
 
 void ChessBoard::updateValidMoves()
 {
     // loop through and update all move vectors
-    for (map<string, Piece*>::iterator it = positions.begin(); it != positions.end(); it++){
+    for (pieceIterator it = positions.begin(); it != positions.end(); it++){
         it->second->calculateValidMoves(it->first);
     }
 }
 
-bool ChessBoard::playerInCheck(Colour defendingColour)
+bool ChessBoard::playerInCheck()
 {
     Piece* piece;
 
     // check if next player is in check
-    for (map<string, Piece*>::iterator it = positions.begin(); it != positions.end(); it++){
+    for (pieceIterator it = positions.begin(); it != positions.end(); it++){
         piece = it->second;
         // if it player who just moved's piece and king is within range
-        if (piece->colour != defendingColour && piece->checkValidMove(kings[defendingColour])){
+        if (piece->colour != whoseTurn && piece->checkValidMove(kings[whoseTurn])){
             return true;
         }
     }
@@ -188,9 +241,8 @@ bool ChessBoard::playerInCheck(Colour defendingColour)
 
 bool ChessBoard::mateCheck()
 {
-    //cout << "checking for mate" << endl;
-
     Piece* piece;
+    Piece* takenPiece = NULL;
     string originalPos, testPos;
     vector<string> moveSet;
 
@@ -199,35 +251,36 @@ bool ChessBoard::mateCheck()
     vector<string> originalKings = kings;
 
     // loop through all pieces for current player
-    // check all moves for each piece and see if king is still in check
-    for (map<string, Piece*>::iterator it = originalPositions.begin(); it != originalPositions.end(); it++){
+    for (pieceIterator it = originalPositions.begin(); it != originalPositions.end(); it++){
         piece = it->second;
         originalPos = it->first;
 
         // turn is updated before the mate checks are called so use current player here
         if (piece->colour == whoseTurn){
             moveSet = piece->validMoves;
-            // loop through all moves for this piece and see if it results in check
+            // check all moves for this piece and see if king is still in check
             for (unsigned i = 0; i < moveSet.size(); i++){
                 testPos = moveSet[i];
 
-                updatePosition(originalPos, testPos);
+                updatePosition(originalPos, testPos, takenPiece);
                 updateValidMoves();
 
                 // check if player is not in check
-                if (!playerInCheck(whoseTurn)){
-
+                if (!playerInCheck()){
                     // put pieces back and reset valid moves so that everything is set for actual move
                     positions = originalPositions;
                     kings = originalKings;
                     updateValidMoves();
-
-                    //cout << "not checkmate because piece at " << originalPos << " can move to " << testPos << endl;
                     return false;
+
+                }else {
+                    // still in check
+                    // put pieces back
+                    positions = originalPositions;
+                    kings = originalKings;
+                    // why do I need this here if I have it above in line 269???
+                    updateValidMoves();
                 }
-                // put pieces back
-                positions = originalPositions;
-                kings = originalKings;
             }
         }
     }
@@ -248,7 +301,7 @@ bool ChessBoard::onBoard(string position)
 
 Colour ChessBoard::checkForPiece(string strPos)
 {
-    // if there is a piece then return it's colour
+    // if there is a piece then return its colour
     if (positions.count(strPos)){
         return positions.find(strPos)->second->colour;
     }else {
@@ -256,60 +309,14 @@ Colour ChessBoard::checkForPiece(string strPos)
     }
 }
 
-bool ChessBoard::validateMove(string currentPos, string targetPos) 
-{
-    Piece* piece; 
-    map<string, Piece*> originalPositions = positions;
-
-    // check if there is a piece at the location
-    if (positions.count(currentPos) == 0){
-        cout << "There is no piece at position " << currentPos << endl;
-        return false;
-    }else {
-        // get pointer to piece
-        piece = positions.find(currentPos)->second;
-    }
-
-    /*
-    cout << "possible moves are ";
-    for (unsigned i = 0; i < piece->validMoves.size(); i++){
-        cout << piece->validMoves[i] << ", ";
-    }
-    cout << endl;
-    */
-
-    // check piece is the correct colour
-    if (piece->colour != whoseTurn){
-        cout << "It is not " << whoseTurn << "'s turn to move!" << endl;
-        return false;
-    }
-    
-    //cout << "asked to calculate range" << endl;
-    if (piece->checkValidMove(targetPos)){
-        updatePosition(currentPos, targetPos);
-
-        // now need to check if player moving has put themselves in check
-        if (playerInCheck(whoseTurn)){
-            cout << "cannot make that move, it would put you in check" << endl;
-            // undo move
-            positions = originalPositions;
-            return false;
-        }else {
-            cout << whoseTurn << "'s " << piece->type << " moves from " << currentPos << " to " << targetPos << endl;
-            return true;
-        }
-    }else {
-        cout << "cannot move " << piece->type << " to " << targetPos << endl;
-        return false;
-    }
-}
-
-void ChessBoard::updatePosition(std::string startPos, std::string endPos)
+void ChessBoard::updatePosition(string startPos, string endPos, Piece*& takenPiece)
 {
     Piece* piece = positions.find(startPos)->second;
 
     // if there is a piece at target position (ie it is captured)
     if (positions.count(endPos)){
+        // record taken piece so we can delete it if move is valid
+        takenPiece = positions.find(endPos)->second;
         // square now occupied by new piece
         positions.find(endPos)->second = piece;
     }else {
@@ -326,7 +333,7 @@ void ChessBoard::updatePosition(std::string startPos, std::string endPos)
     positions.erase(startPos);
 }
 
-ChessBoard::ChessBoard() : whoseTurn(WHITE), inCheck(NO_PIECE)
+ChessBoard::ChessBoard() : whoseTurn(WHITE)
 {
     resetBoard();
 }

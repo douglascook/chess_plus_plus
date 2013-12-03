@@ -9,49 +9,49 @@ void Knight::calculateValidMoves(std::string currentPos)
     validMoves.clear();
     string endPos = currentPos;
 
-    // create some sort of loop to do this....
-    endPos[0] = currentPos[0] - 1;
-    //
-    endPos[1] = currentPos[1] - 2;
-    if (board->onBoard(endPos) && board->checkForPiece(endPos) != colour){
-        validMoves.push_back(endPos);
-    }
-    endPos[1] = currentPos[1] + 2;
-    if (board->onBoard(endPos) && board->checkForPiece(endPos) != colour){
-        validMoves.push_back(endPos);
-    }
+    int fileChange, rankChange;
+    for (int i = 0; i < 8;  i++){
+        // coordinate change depends on which loop
+        switch (i){
+            case 0:
+                fileChange = 1;
+                rankChange = 2;
+                break;
+            case 1:
+                fileChange = 2;
+                rankChange = 1;
+                break;
+            case 2:
+                fileChange = 2;
+                rankChange = -1;
+                break;
+            case 3:
+                fileChange = 1;
+                rankChange = -2;
+                break;
+            case 4:
+                fileChange = -1;
+                rankChange = -2;
+                break;
+            case 5:
+                fileChange = -2;
+                rankChange = -1;
+                break;
+            case 6:
+                fileChange = -2;
+                rankChange = 1;
+                break;
+            case 7:
+                fileChange = -1;
+                rankChange = 2;
+                break;
+        }
 
-    endPos[0] = currentPos[0] + 1;
-    //
-    endPos[1] = currentPos[1] - 2;
-    if (board->onBoard(endPos) && board->checkForPiece(endPos) != colour){
-        validMoves.push_back(endPos);
-    }
-    endPos[1] = currentPos[1] + 2;
-    if (board->onBoard(endPos) && board->checkForPiece(endPos) != colour){
-        validMoves.push_back(endPos);
-    }
-
-    endPos[1] = currentPos[1] - 1;
-    //
-    endPos[0] = currentPos[0] - 2;
-    if (board->onBoard(endPos) && board->checkForPiece(endPos) != colour){
-        validMoves.push_back(endPos);
-    }
-    endPos[0] = currentPos[0] + 2;
-    if (board->onBoard(endPos) && board->checkForPiece(endPos) != colour){
-        validMoves.push_back(endPos);
-    }
-
-    endPos[1] = currentPos[1] + 1;
-    //
-    endPos[0] = currentPos[0] - 2;
-    if (board->onBoard(endPos) && board->checkForPiece(endPos) != colour){
-        validMoves.push_back(endPos);
-    }
-    endPos[0] = currentPos[0] + 2;
-    if (board->onBoard(endPos) && board->checkForPiece(endPos) != colour){
-        validMoves.push_back(endPos);
+        endPos[0] = currentPos[0] + fileChange;
+        endPos[1] = currentPos[1] + rankChange;
+        if (board->onBoard(endPos) && board->checkForPiece(endPos) != colour){
+            validMoves.push_back(endPos);
+        }
     }
 }
 

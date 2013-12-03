@@ -13,6 +13,9 @@
 #include "queen.h"
 #include "king.h"
 
+// iterator needed to loop through pieces on the board
+typedef std::map<std::string, Piece*>::iterator pieceIterator;
+
 class ChessBoard
 {
     private:
@@ -23,9 +26,7 @@ class ChessBoard
         // whose turn it is
         Colour whoseTurn;
 
-        // if either player is in check
-        Colour inCheck;
-
+        // positions of the kings
         std::vector<std::string> kings;
 
         // update move vectors for all pieces
@@ -35,10 +36,10 @@ class ChessBoard
         bool validateMove(std::string startPos, std::string endPos);
 
         // update position of piece
-        void updatePosition(std::string startPos, std::string endPos);
+        void updatePosition(std::string startPos, std::string endPos, Piece*& takenPiece);
 
         // check if player is in check
-        bool playerInCheck(Colour defendingColour);
+        bool playerInCheck();
 
         // check if there are any valid moves, return true for stalemate or checkmate
         bool mateCheck();
@@ -47,14 +48,14 @@ class ChessBoard
         // reset pieces to starting positions
         void resetBoard();
 
-        // check if given position is on board
-        bool onBoard(std::string position);
-
         // take in start and end positions on board
         void submitMove(std::string startPos, std::string endPos);
 
         // check if piece is in given position and return colour or neither
         Colour checkForPiece(std::string startPos);
+
+        // check if given position is on board
+        bool onBoard(std::string position);
 
         // for testing purposes
         void printBoard();

@@ -16,9 +16,20 @@ void Pawn::calculateValidMoves(std::string currentPos)
     // if there is no piece in the way add to possible moves
     if (board->onBoard(endPos) && board->checkForPiece(endPos) == NO_PIECE){
         validMoves.push_back(endPos);
+
+        // can only go two forward if there is nothing in the way!
+        // if its first move check two squares ahead
+        if (!moved){
+            colour == WHITE ? endPos[1]++ : endPos[1]--;
+            if (board->onBoard(endPos) && board->checkForPiece(endPos) == NO_PIECE){
+                validMoves.push_back(endPos);
+            }
+        }
     }
 
     // now check for pieces that can be captured 
+    colour == WHITE ? endPos[1] = currentPos[1] + 1 : endPos[1] = currentPos[1] - 1;
+
     endPos[0] = currentPos[0] - 1;
     // if it is an enemy piece
     // has to be a nicer way to check that the the piece is of the other colour
@@ -30,19 +41,6 @@ void Pawn::calculateValidMoves(std::string currentPos)
     if (board->onBoard(endPos) && board->checkForPiece(endPos) == (colour + 1)%2 ){
         validMoves.push_back(endPos);
     }
-
-    // if its first move check two squares ahead
-    endPos[0] = currentPos[0];
-    //cout << endPos << endl;
-    if (!moved){
-        colour == WHITE ? endPos[1]++ : endPos[1]--;
-        //cout << endPos << endl;
-        if (board->onBoard(endPos) && board->checkForPiece(endPos) == NO_PIECE){
-            validMoves.push_back(endPos);
-        }
-    }
-
-    //cout << validMoves.size() << " possible moves in range from position " << currentPos << endl;
 }
 
 Pawn::Pawn(Colour _colour, ChessBoard* _board) 
