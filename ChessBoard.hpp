@@ -28,6 +28,8 @@ class ChessBoard
 
         // update move vectors for all pieces
         void updateValidMoves();
+        // overloaded version, only update moves for one colour
+        void updateValidMoves(Colour player);
         // check if move is valid
         bool validateMove(std::string startPos, std::string endPos);
         // update position of piece
@@ -36,21 +38,20 @@ class ChessBoard
         bool playerInCheck();
         // check if there are any valid moves, return true for stalemate or checkmate
         bool mateCheck();
-
         // convert colour enum to string
         std::string printColour(Colour colour);
+        // return colour of opponent
+        Colour otherPlayer(Colour player);
 
     public:
         // reset pieces to starting positions
         void resetBoard();
-        // take in start and end positions on board
+        // take in start and end positions of desired move
         void submitMove(std::string startPos, std::string endPos);
-        // check if piece is in given position and return colour or neither
+        // check if piece is in given position and return colour or no piece
         Colour checkForPiece(std::string startPos);
         // check if given position is on board
         bool onBoard(std::string position);
-        // for testing purposes
-        void printBoard();
 
         // constructor, needs to set up board
         ChessBoard();
