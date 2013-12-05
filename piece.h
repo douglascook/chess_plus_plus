@@ -30,13 +30,16 @@ class Piece
         bool checkValidMove(std::string targetPos);
         // accessor function for colour of piece
         Colour getColour();
+        // return colour of opponent
+        static Colour otherPlayer(Colour player);
         // accessor function for type of piece
         std::string getType();
         // accessor function for valid moves
         std::vector<std::string> getValidMoves();
+
+
         // non-default constructor, to be used in derived constructors
         Piece(Colour colour, std::string type, ChessBoard* board);
-
         // need a virtual destructor so that derived classes can be deleted properly
         virtual ~Piece() = 0;
 };

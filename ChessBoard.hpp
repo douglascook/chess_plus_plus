@@ -40,8 +40,6 @@ class ChessBoard
         bool mateCheck();
         // convert colour enum to string
         std::string printColour(Colour colour);
-        // return colour of opponent
-        Colour otherPlayer(Colour player);
 
     public:
         // reset pieces to starting positions

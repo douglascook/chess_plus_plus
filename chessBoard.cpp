@@ -62,7 +62,7 @@ void ChessBoard::submitMove(string currentPos, string targetPos)
     // check if move is legal
     if (validateMove(currentPos, targetPos)){
         // update turn to check for mates
-        whoseTurn = (whoseTurn == WHITE ? BLACK : WHITE);
+        whoseTurn = Piece::otherPlayer(whoseTurn);
 
         // checkmate or stalemate check
         if (mateCheck()){
@@ -94,7 +94,7 @@ bool ChessBoard::validateMove(string currentPos, string targetPos)
     
     // check piece is the correct colour
     if (piece->getColour() != whoseTurn){
-        cout << "It is not " << printColour(otherPlayer(whoseTurn)) << "'s turn to move!" << endl;
+        cout << "It is not " << printColour(Piece::otherPlayer(whoseTurn)) << "'s turn to move!" << endl;
         return false;
     }
     
@@ -113,7 +113,7 @@ bool ChessBoard::validateMove(string currentPos, string targetPos)
             // successful move, piece has been taken 
             cout << printColour(whoseTurn) << "'s " << piece->getType() 
                  << " moves from " << currentPos << " to " << targetPos 
-                 << " taking " << printColour(otherPlayer(whoseTurn)) << "'s " << takenPiece->getType() << endl;
+                 << " taking " << printColour(Piece::otherPlayer(whoseTurn)) << "'s " << takenPiece->getType() << endl;
             delete takenPiece;
             return true;
         }else {
@@ -190,14 +190,14 @@ bool ChessBoard::mateCheck()
                 testPos = moveSet[i];
                 updatePosition(originalPos, testPos, takenPiece);
                 // only need to update opponents pieces to see if king is still in check
-                updateValidMoves(otherPlayer(whoseTurn));
+                updateValidMoves(Piece::otherPlayer(whoseTurn));
 
                 // check if player is not in check
                 if (!playerInCheck()){
                     // put pieces back and reset valid moves so that everything is set for actual move
                     positions = originalPositions;
                     kings = originalKings;
-                    updateValidMoves(otherPlayer(whoseTurn));
+                    updateValidMoves(Piece::otherPlayer(whoseTurn));
                     return false;
 
                 }else {
@@ -205,13 +205,13 @@ bool ChessBoard::mateCheck()
                     // put pieces back and reset valid moves so that next move can be checked 
                     positions = originalPositions;
                     kings = originalKings;
-                    updateValidMoves(otherPlayer(whoseTurn));
+                    updateValidMoves(Piece::otherPlayer(whoseTurn));
                 }
             }
         }
     }
     // if all moves result in check
-    updateValidMoves(otherPlayer(whoseTurn));
+    updateValidMoves(Piece::otherPlayer(whoseTurn));
     return true;
 }
 
@@ -266,12 +266,6 @@ string ChessBoard::printColour(Colour colour)
     }else {
         return "Black";
     }
-}
-
-Colour ChessBoard::otherPlayer(Colour player)
-{
-    Colour otherPlayer = (player == WHITE ? BLACK : WHITE);
-    return otherPlayer;
 }
 
 ChessBoard::ChessBoard() : whoseTurn(WHITE)

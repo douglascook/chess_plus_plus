@@ -5,11 +5,12 @@ using namespace std;
 
 void Knight::calculateValidMoves(std::string currentPos)
 {
+    int fileChange, rankChange;
+
     // get rid of any moves left over from last turn
     validMoves.clear();
     string endPos = currentPos;
 
-    int fileChange, rankChange;
     for (int i = 0; i < 8;  i++){
         // coordinate change depends on which loop
         switch (i){
@@ -46,9 +47,10 @@ void Knight::calculateValidMoves(std::string currentPos)
                 rankChange = 2;
                 break;
         }
-
         endPos[0] = currentPos[0] + fileChange;
         endPos[1] = currentPos[1] + rankChange;
+
+        // cannot move off board or onto a friendly piece
         if (board->onBoard(endPos) && board->checkForPiece(endPos) != colour){
             validMoves.push_back(endPos);
         }
