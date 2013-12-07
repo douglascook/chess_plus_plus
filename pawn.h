@@ -5,12 +5,14 @@
 
 class Pawn : public Piece
 {
-    public:
+    private:
         // used to record if pawn has moved yet
         bool moved;
 
+    public:
         // create vector of valid moves for pawn 
         void calculateValidMoves(std::string currentPos);
+
         // constructor
         Pawn(Colour colour, ChessBoard* board);
 };

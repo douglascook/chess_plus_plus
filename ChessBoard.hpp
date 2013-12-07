@@ -44,12 +44,14 @@ class ChessBoard
     public:
         // reset pieces to starting positions
         void resetBoard();
-        // take in start and end positions of desired move
+        // process given move 
         void submitMove(std::string startPos, std::string endPos);
-        // check if piece is in given position and return colour or no piece
+        // check if a piece is in given position and return colour or no piece
         Colour checkForPiece(std::string startPos);
         // check if given position is on board
         bool onBoard(std::string position);
+        // return colour of opponent
+        static Colour otherPlayer(Colour player);
 
         // constructor, needs to set up board
         ChessBoard();

@@ -38,7 +38,7 @@ void Bishop::calculateValidMoves(std::string currentPos)
         while (board->onBoard(endPos) && board->checkForPiece(endPos) != colour){
             validMoves.push_back(endPos);
             // if we have got to an enemy piece cannot pass it
-            if (board->checkForPiece(endPos) == otherPlayer(colour)){
+            if (board->checkForPiece(endPos) == ChessBoard::otherPlayer(colour)){
                 break;
             }
             endPos[0] = endPos[0] + fileChange;

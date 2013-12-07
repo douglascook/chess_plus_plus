@@ -19,12 +19,6 @@ Colour Piece::getColour()
     return colour;
 }
 
-Colour Piece::otherPlayer(Colour player)
-{
-    Colour otherPlayer = (player == WHITE ? BLACK : WHITE);
-    return otherPlayer;
-}
-
 string Piece::getType()
 {
     return type;
