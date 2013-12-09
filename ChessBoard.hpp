@@ -23,6 +23,8 @@ class ChessBoard
         std::map<std::string, Piece*> positions;
         // whose turn it is
         Colour whoseTurn;
+        // if the game has finished
+        bool gameOver;
         // positions of the kings
         std::vector<std::string> kings;
 
@@ -40,6 +42,8 @@ class ChessBoard
         bool mateCheck();
         // convert colour enum to string
         std::string printColour(Colour colour);
+        // clean up pieces left over from previous game
+        void deletePieces();
 
     public:
         // reset pieces to starting positions
@@ -55,6 +59,8 @@ class ChessBoard
 
         // constructor, needs to set up board
         ChessBoard();
+        // destructor needs to destroy any remaining pieces
+        ~ChessBoard();
 };
 
 #endif

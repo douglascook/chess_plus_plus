@@ -6,14 +6,12 @@ using namespace std;
 
 void ChessBoard::resetBoard()
 {
-    // clean up pieces left over from previous game
-    for (pieceIterator it = positions.begin(); it != positions.end(); it++){
-        delete it->second;
-    }
-    positions.clear();
+    gameOver = false;
+
+    // get rid of any pieces remaining from previous game
+    deletePieces();
 
     // record positions of kings for quick access
-    kings.clear();
     kings.push_back("E1");
     kings.push_back("E8");
 
@@ -59,6 +57,11 @@ void ChessBoard::resetBoard()
 
 void ChessBoard::submitMove(string currentPos, string targetPos)
 {
+    // if the game is over then do not accept a move
+    if (gameOver){
+        cout << "The game is over" << endl;
+        return;
+    }
     // check if move is legal
     if (validateMove(currentPos, targetPos)){
         // update turn to check for mates
@@ -66,6 +69,7 @@ void ChessBoard::submitMove(string currentPos, string targetPos)
 
         // checkmate or stalemate check
         if (mateCheck()){
+            gameOver = true;
             if (playerInCheck()){
                 cout << printColour(whoseTurn) << " is in check mate" << endl;
             }else {
@@ -278,7 +282,22 @@ string ChessBoard::printColour(Colour colour)
     }
 }
 
+void ChessBoard::deletePieces()
+{
+    // clean up pieces left over from previous game
+    for (pieceIterator it = positions.begin(); it != positions.end(); it++){
+        delete it->second;
+    }
+    kings.clear();
+    positions.clear();
+}
+
 ChessBoard::ChessBoard() : whoseTurn(WHITE)
 {
     resetBoard();
+}
+
+ChessBoard::~ChessBoard()
+{
+    deletePieces();
 }
